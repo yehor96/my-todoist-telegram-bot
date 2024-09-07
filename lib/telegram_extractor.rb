@@ -6,18 +6,20 @@ class TelegramExtractor
   
   def extract_sender(message)
     if message.forward_from
-      extract_forward_from(message)
+      extract_sender_from(message.forward_from)
     elsif message.forward_from_chat
       message.forward_from_chat.title || message.forward_from_chat.username
+    elsif message.from
+      extract_sender_from(message.from)
     else
       nil
     end
   end
     
-   def extract_forward_from(message)
-    first_name = message.forward_from.first_name
-    last_name = message.forward_from.last_name
-    username = message.forward_from.username
+   def extract_sender_from(object)
+    first_name = object.first_name
+    last_name = object.last_name
+    username = object.username
     
     if first_name.nil? && last_name.nil?
       username
