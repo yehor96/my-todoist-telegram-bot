@@ -3,6 +3,8 @@ require 'uri'
 require 'json'
 require 'logger'
 
+require_relative '../../bin/configurator'
+
 class TodoistClient
 
   def initialize

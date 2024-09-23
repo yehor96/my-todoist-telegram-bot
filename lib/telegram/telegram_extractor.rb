@@ -1,6 +1,19 @@
 class TelegramExtractor
 
-  def extract_message(message)
+  def extract_message_data(message)
+    content = extract_text(message)
+    return nil if content.nil?
+
+    data = {
+      content: content,
+      description: extract_sender(message),
+      labels: get_labels
+    }
+  end
+  
+  private  
+
+  def extract_text(message)
     message.text || message.caption
   end
   
@@ -30,5 +43,9 @@ class TelegramExtractor
     else
       "#{first_name} #{last_name}"
     end
+  end
+
+  def get_labels 
+    return ["Telegram", Time.now.strftime("%b %-d, %Y %H:%M")];
   end
 end
