@@ -1,29 +1,30 @@
 class TelegramExtractor
 
   def extract_message_data(message)
-    content = extract_text(message)
+    @message = message
+    content = extract_text
     return nil if content.nil?
 
     data = {
       content: content,
-      description: extract_sender(message),
+      description: get_current_date,
       labels: get_labels
     }
   end
   
   private  
 
-  def extract_text(message)
-    message.text || message.caption
+  def extract_text
+    @message.text || @message.caption
   end
   
-  def extract_sender(message)
-    if message.forward_from
-      extract_sender_from(message.forward_from)
-    elsif message.forward_from_chat
-      message.forward_from_chat.title || message.forward_from_chat.username
-    elsif message.from
-      extract_sender_from(message.from)
+  def extract_sender
+    if @message.forward_from
+      extract_sender_from(@message.forward_from)
+    elsif @message.forward_from_chat
+      @message.forward_from_chat.title || @message.forward_from_chat.username
+    elsif @message.from
+      extract_sender_from(@message.from)
     else
       nil
     end
@@ -45,7 +46,11 @@ class TelegramExtractor
     end
   end
 
-  def get_labels 
-    return ["Telegram", Time.now.strftime("%b %-d, %Y %H:%M")];
+  def get_current_date
+    Time.now.strftime("%b %-d, %Y %H:%M")
+  end
+
+  def get_labels
+    return ["Telegram", extract_sender];
   end
 end
