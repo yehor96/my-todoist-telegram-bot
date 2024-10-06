@@ -6,12 +6,16 @@ require 'logger'
 require_relative '../../bin/configurator'
 
 class TodoistClient
+  BASE_URL = 'https://api.todoist.com/rest/v2'.freeze
 
   def initialize
     config = Configurator.load
     @todoist_token = config['todoist_token']
-    @tasks_url = URI.parse('https://api.todoist.com/rest/v2/tasks')
     @logger = Logger.new(STDOUT)
+
+    # Urls
+    @tasks_url = URI.parse("#{BASE_URL}/tasks")
+    @projects_url = URI.parse("#{BASE_URL}/projects")
   end
 
   def create_task(options)
@@ -34,13 +38,46 @@ class TodoistClient
     end
   end
 
+  def get_tasks(project_id)
+    tasks_url = @tasks_url.dup
+    tasks_url.query = URI.encode_www_form(project_id: project_id)
+    request = get_request(tasks_url)
+
+    begin
+      response = http(@tasks_url).request(request)
+      JSON.parse(response.body)
+    rescue StandardError => e
+      @logger.error("Error getting tasks: #{e.message}")
+      nil
+    end
+  end
+
+  def get_projects
+    request = get_request(@projects_url)
+    begin
+      response = http(@projects_url).request(request)
+      JSON.parse(response.body)
+    rescue StandardError => e
+      @logger.error("Error getting all projects: #{e.message}")
+      nil
+    end
+  end
+
   private
 
+  def get_request(url)
+    Net::HTTP::Get.new(url.request_uri, request_values)
+  end
+
   def post_request(url)
-    Net::HTTP::Post.new(url.request_uri, { 
+    Net::HTTP::Post.new(url.request_uri, request_values)
+  end
+
+  def request_values
+    {
         'Content-Type' => 'application/json', 
         'Authorization' => 'Bearer ' + @todoist_token
-    })
+    }
   end
 
   def http(url)
