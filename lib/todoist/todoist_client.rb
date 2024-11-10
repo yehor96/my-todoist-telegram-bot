@@ -16,16 +16,12 @@ class TodoistClient
     # Urls
     @tasks_url = URI.parse("#{BASE_URL}/tasks")
     @projects_url = URI.parse("#{BASE_URL}/projects")
+    @comments_url = URI.parse("#{BASE_URL}/comments")
   end
 
   def create_task(options)
     request = post_request(@tasks_url)
-    request.body = {
-        content: options[:content],
-        description: options[:description],
-        project_id: options[:project_id],
-        labels: options[:labels]
-    }.to_json
+    request.body = options.to_json
 
     begin
       response = http(@tasks_url).request(request)
@@ -59,6 +55,21 @@ class TodoistClient
       JSON.parse(response.body)
     rescue StandardError => e
       @logger.error("Error getting all projects: #{e.message}")
+      nil
+    end
+  end
+
+  def add_comment(options)
+    request = post_request(@comments_url)
+    request.body = options.to_json
+
+    begin
+      response = http(@comments_url).request(request)
+      id = JSON.parse(response.body)['id']
+      @logger.info("Added comment '#{options[:content]}' with id: #{id}")
+      id
+    rescue StandardError => e
+      @logger.error("Error adding comment: #{e.message}")
       nil
     end
   end

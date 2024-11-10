@@ -1,6 +1,6 @@
 class TelegramExtractor
 
-  def extract_message_data(message)
+  def extract_data(message)
     @message = message
     text = extract_text
     return nil if text.nil?
