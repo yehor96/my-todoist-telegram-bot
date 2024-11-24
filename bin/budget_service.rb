@@ -1,15 +1,15 @@
 require 'logger'
 
-require_relative '../lib/todoist/todoist_helper'
+require_relative '../lib/todoist/todoist_service'
 require_relative '../lib/todoist/todoist_client'
 
-class BudgetExpenseManager
+class BudgetService
 
   BUDGET_EXPENSE_SYMBOLS = ['$', '€', '₴', '₽', '¥', '£'].freeze
   BUDGET_EXPENSE_LABEL = 'Budget Expense'
 
   def initialize
-    @todoist_helper = TodoistHelper.new
+    @todoist_service = TodoistService.new
     @todoist = TodoistClient.new
     @logger = Logger.new(STDOUT)
   end
@@ -17,12 +17,7 @@ class BudgetExpenseManager
   def process_budget_expense(options)
     task_id = get_budget_expense_task(options)
     strip_budget_expense_symbol(options)
-
-    comment_options = {
-      task_id: task_id,
-      content: options[:content]
-    }
-    @todoist.add_comment(comment_options)
+    @todoist_service.add_comment(task_id, options[:content])
   end
 
   def is_budget_expense?(data)
@@ -36,7 +31,7 @@ class BudgetExpenseManager
   end
 
   def get_budget_expense_task(options)
-    tasks = @todoist_helper.get_tasks_by_label(BUDGET_EXPENSE_LABEL)
+    tasks = @todoist_service.get_tasks_by_label(BUDGET_EXPENSE_LABEL)
     return tasks[0]['id'] if !tasks.nil? && tasks.length > 0
 
     budget_expense_options = {

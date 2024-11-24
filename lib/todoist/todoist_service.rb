@@ -1,6 +1,6 @@
 require_relative '../../lib/todoist/todoist_client'
 
-class TodoistHelper
+class TodoistService
 
   def initialize
     @todoist = TodoistClient.new
@@ -14,6 +14,14 @@ class TodoistHelper
 
   def inbox_id
     @inbox_id ||= fetch_inbox_id
+  end
+
+  def add_comment(task_id, comment)
+    comment_options = {
+      task_id: task_id,
+      content: comment
+    }
+    @todoist.add_comment(comment_options)
   end
 
   private

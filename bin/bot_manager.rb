@@ -1,6 +1,7 @@
 require_relative '../lib/telegram/telegram_extractor'
 require_relative '../lib/todoist/todoist_client'
-require_relative '../bin/budget_expense_manager'
+require_relative '../lib/todoist/todoist_service'
+require_relative '../bin/budget_service'
 
 class BotManager
 
@@ -9,7 +10,8 @@ class BotManager
   def initialize
     @telegram_extractor = TelegramExtractor.new
     @todoist = TodoistClient.new
-    @budget_manager = BudgetExpenseManager.new
+    @todoist_service = TodoistService.new
+    @budget_service = BudgetService.new
   end
 
   def process_message(message)
@@ -18,29 +20,33 @@ class BotManager
 
     options = build_todoist_options(telegram_data)
 
-    return @budget_manager.process_budget_expense(options) if @budget_manager.is_budget_expense?(options)
-    return shorten(options) if options[:content].length > MAX_CONTENT_LENGTH
-    @todoist.create_task(options)
+    return @budget_service.process_budget_expense(options) if @budget_service.is_budget_expense?(options)
+
+    shorten(options) if options[:content].length > MAX_CONTENT_LENGTH
+
+    task_id = @todoist.create_task(options)
+    process_comments(task_id, options) if options[:comments].length > 0
   end
 
   private
 
+  def process_comments(task_id, options)
+    options[:comments].each do |comment|
+      @todoist_service.add_comment(task_id, comment)
+    end
+  end
+
   def shorten(options)
     full_content = options[:content]
     options[:content] = options[:content][0..MAX_CONTENT_LENGTH - 1].concat('...')
-    task_id = @todoist.create_task(options)
-
-    comment_options = {
-      task_id: task_id,
-      content: full_content
-    }
-    @todoist.add_comment(comment_options)
+    options[:comments].unshift(full_content)
   end
 
   def build_todoist_options(telegram_data)
     {
       content: telegram_data[:text],
       description: telegram_data[:sender],
+      comments: telegram_data[:links],
       labels: [
         'Telegram',
       ]

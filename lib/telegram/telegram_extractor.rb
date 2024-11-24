@@ -7,7 +7,8 @@ class TelegramExtractor
 
     data = {
       text: text,
-      sender: extract_sender
+      sender: extract_sender,
+      links: extract_links
     }
   end
 
@@ -44,4 +45,29 @@ class TelegramExtractor
       "#{first_name} #{last_name}"
     end
   end
+
+  def extract_links
+    links = []
+
+    if @message.entities&.any?
+      links.concat(@message.entities.map do |entity|
+        entity.url if is_non_telegram_link?(entity)
+      end.compact)
+    end
+
+    if @message.caption_entities&.any?
+      links.concat(@message.caption_entities.map do |entity|
+        entity.url if is_non_telegram_link?(entity)
+      end.compact)
+    end
+
+    links
+  end
+
+  def is_non_telegram_link?(entity)
+    return false if entity.nil? || entity.url.nil?
+    return false unless entity.type == 'text_link' || entity.type == 'url'
+    return !entity.url.start_with?('https://t.me')
+  end
+
 end
