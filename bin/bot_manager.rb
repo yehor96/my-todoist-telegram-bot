@@ -4,6 +4,8 @@ require_relative '../bin/budget_expense_manager'
 
 class BotManager
 
+  MAX_CONTENT_LENGTH = 95
+
   def initialize
     @telegram_extractor = TelegramExtractor.new
     @todoist = TodoistClient.new
@@ -16,10 +18,24 @@ class BotManager
 
     options = build_todoist_options(telegram_data)
 
-    @budget_manager.is_budget_expense?(options) ? @budget_manager.process_budget_expense(options) : @todoist.create_task(options)
+    return @budget_manager.process_budget_expense(options) if @budget_manager.is_budget_expense?(options)
+    return shorten(options) if options[:content].length > MAX_CONTENT_LENGTH
+    @todoist.create_task(options)
   end
 
   private
+
+  def shorten(options)
+    full_content = options[:content]
+    options[:content] = options[:content][0..MAX_CONTENT_LENGTH - 1].concat('...')
+    task_id = @todoist.create_task(options)
+
+    comment_options = {
+      task_id: task_id,
+      content: full_content
+    }
+    @todoist.add_comment(comment_options)
+  end
 
   def build_todoist_options(telegram_data)
     {
