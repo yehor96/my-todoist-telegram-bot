@@ -26,9 +26,15 @@ class BotManager
 
     task_id = @todoist.create_task(options)
     process_comments(task_id, options) if options[:comments].length > 0
+
+    needs_warning(message)
   end
 
   private
+
+  def needs_warning(message)
+    message.photo || message.video || message.document || message.audio || message.voice
+  end
 
   def process_comments(task_id, options)
     options[:comments].each do |comment|
