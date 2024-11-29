@@ -9,8 +9,8 @@ class TodoistClient
   BASE_URL = 'https://api.todoist.com/rest/v2'.freeze
 
   def initialize
-    config = Configurator.load
-    @todoist_token = config['todoist_token']
+    config = Configurator.new
+    @todoist_token = config.prop 'todoist_token'
     @logger = Logger.new(STDOUT)
 
     # Urls
