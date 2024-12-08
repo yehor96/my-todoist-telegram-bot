@@ -1,0 +1,10 @@
+#! /usr/bin/env ruby
+
+require "daemons"
+
+options = {
+  :app_name => 'my_todoist_bot',
+  :log_output => true,
+}
+
+Daemons.run('bin/bot.rb', options)

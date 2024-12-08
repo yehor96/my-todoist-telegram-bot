@@ -3,7 +3,7 @@ require 'yaml'
 class Configurator
 
   def initialize
-    @config ||= YAML.load_file('config/secrets.yml')
+    @config ||= YAML.load_file(File.expand_path('../config/secrets.yml', __dir__))
   end
 
   def prop(key)
