@@ -7,11 +7,11 @@ class BotManager
 
   MAX_CONTENT_LENGTH = 95
 
-  def initialize
-    @telegram_extractor = TelegramExtractor.new
-    @todoist = TodoistClient.new
-    @todoist_service = TodoistService.new
-    @budget_service = BudgetService.new
+  def initialize(telegram_extractor, todoist_client, todoist_service, budget_service)
+    @telegram_extractor = telegram_extractor
+    @todoist = todoist_client
+    @todoist_service = todoist_service
+    @budget_service = budget_service
   end
 
   def process_message(message)

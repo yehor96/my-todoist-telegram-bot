@@ -8,10 +8,10 @@ class BudgetService
   BUDGET_EXPENSE_SYMBOLS = ['$', '€', '₴', '₽', '¥', '£'].freeze
   BUDGET_EXPENSE_LABEL = 'Budget Expense'
 
-  def initialize
-    @todoist_service = TodoistService.new
-    @todoist = TodoistClient.new
-    @logger = Logger.new(STDOUT)
+  def initialize(logger, todoist_service, todoist_client)
+    @logger = logger
+    @todoist_service = todoist_service
+    @todoist = todoist_client
   end
 
   def process_budget_expense(options)

@@ -2,8 +2,8 @@ require_relative '../../lib/todoist/todoist_client'
 
 class TodoistService
 
-  def initialize
-    @todoist = TodoistClient.new
+  def initialize(todoist_client)
+    @todoist = todoist_client
   end
 
   def get_tasks_by_label(label)

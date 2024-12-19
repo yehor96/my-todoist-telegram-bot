@@ -6,9 +6,9 @@ require 'logger'
 class TodoistClient
   BASE_URL = 'https://api.todoist.com/rest/v2'.freeze
 
-  def initialize
+  def initialize(logger)
+    @logger = logger
     @todoist_token = ENV['TODOIST_TOKEN']
-    @logger = Logger.new(STDOUT)
 
     # Urls
     @tasks_url = URI.parse("#{BASE_URL}/tasks")

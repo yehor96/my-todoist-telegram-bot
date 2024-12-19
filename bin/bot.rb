@@ -3,9 +3,18 @@ require 'dotenv/load'
 
 require_relative '../bin/bot_manager'
 
-bot_manager = BotManager.new
+logger = Logger.new(STDOUT)
 
+telegram_extractor = TelegramExtractor.new
+
+todoist_client = TodoistClient.new(logger)
+todoist_service = TodoistService.new(todoist_client)
+
+budget_service = BudgetService.new(logger, todoist_service, todoist_client)
+
+bot_manager = BotManager.new(telegram_extractor, todoist_client, todoist_service, budget_service)
 bot = Telegram::Bot::Client.new(ENV['TELEGRAM_TOKEN'])
+
 bot.listen do |message|
   begin
     bot_manager.process_message(message)
