@@ -1,16 +1,15 @@
 require 'telegram/bot'
+require 'dotenv/load'
 
-require_relative '../bin/configurator'
 require_relative '../bin/bot_manager'
 
-config = Configurator.new
 bot_manager = BotManager.new
 
-bot = Telegram::Bot::Client.new(config.prop 'telegram_token')
+bot = Telegram::Bot::Client.new(ENV['TELEGRAM_TOKEN'])
 bot.listen do |message|
   begin
-    needs_warning = bot_manager.process_message(message)
-    response = needs_warning ? "⚠️ Media files are not supported. Task created without attachments." : "✅ Todoist task created"
+    bot_manager.process_message(message)
+    response = bot_manager.needs_warning?(message) ? "⚠️ Media files are not supported. Task created without attachments." : "✅ Todoist task created"
     bot.api.send_message(chat_id: message.chat.id, text: response)
   rescue StandardError => e
     bot.api.send_message(chat_id: message.chat.id, text: "❌ Failed to create Todoist task")

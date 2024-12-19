@@ -3,14 +3,11 @@ require 'uri'
 require 'json'
 require 'logger'
 
-require_relative '../../bin/configurator'
-
 class TodoistClient
   BASE_URL = 'https://api.todoist.com/rest/v2'.freeze
 
   def initialize
-    config = Configurator.new
-    @todoist_token = config.prop 'todoist_token'
+    @todoist_token = ENV['TODOIST_TOKEN']
     @logger = Logger.new(STDOUT)
 
     # Urls
