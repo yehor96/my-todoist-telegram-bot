@@ -2,21 +2,24 @@ require_relative '../lib/telegram/telegram_extractor'
 require_relative '../lib/todoist/todoist_client'
 require_relative '../lib/todoist/todoist_service'
 require_relative '../bin/budget_service'
+require_relative '../errors/forbidden_error'
+require_relative '../utils/file_reader'
 
 class BotManager
-
   MAX_CONTENT_LENGTH = 95
 
-  def initialize(telegram_extractor, todoist_client, todoist_service, budget_service)
+  def initialize(telegram_extractor, todoist_client, todoist_service, budget_service, validator)
     @telegram_extractor = telegram_extractor
     @todoist = todoist_client
     @todoist_service = todoist_service
     @budget_service = budget_service
+    @validator = validator
   end
 
   def process_message(message)
     telegram_data = @telegram_extractor.extract_data(message)
     return if telegram_data.nil?
+    @validator.validate_user_allowed(telegram_data[:username])
 
     options = build_todoist_options(telegram_data)
 
@@ -56,4 +59,11 @@ class BotManager
       ]
     }
   end
+
+  def validate_user_allowed(telegram_data)
+    username = telegram_data[:username]
+    contains_user = ALLOWED_USERS.include?(username)
+    raise ForbiddenError, "Username is not in the allowed users list - #{username}" unless contains_user
+  end
+
 end

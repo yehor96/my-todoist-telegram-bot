@@ -8,11 +8,16 @@ class TelegramExtractor
     data = {
       text: text,
       sender: extract_sender,
-      links: extract_links
+      links: extract_links,
+      username: extract_username
     }
   end
 
   private
+
+  def extract_username
+    @message.from.username || ''
+  end
 
   def extract_text
     @message.text || @message.caption
