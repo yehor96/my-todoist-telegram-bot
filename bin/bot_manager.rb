@@ -59,11 +59,4 @@ class BotManager
       ]
     }
   end
-
-  def validate_user_allowed(telegram_data)
-    username = telegram_data[:username]
-    contains_user = ALLOWED_USERS.include?(username)
-    raise ForbiddenError, "Username is not in the allowed users list - #{username}" unless contains_user
-  end
-
 end
