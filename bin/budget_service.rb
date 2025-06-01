@@ -14,34 +14,30 @@ class BudgetService
     @todoist = todoist_client
   end
 
-  def process_budget_expense(options)
-    task_id = get_budget_expense_task(options)
-    strip_budget_expense_symbol(options)
-    @todoist_service.add_comment(task_id, options[:content])
+  def process_budget_expense(data)
+    task_id = get_budget_expense_task(data)
+    data[:title].slice!(0).strip!
+    @todoist_service.add_comment(task_id, data[:title])
   end
 
   def is_budget_expense?(data)
-    BUDGET_EXPENSE_SYMBOLS.include?(data[:content][0])
+    BUDGET_EXPENSE_SYMBOLS.include?(data[:title][0])
   end
 
   private
 
-  def strip_budget_expense_symbol(data)
-    data[:content].slice!(0)
-  end
-
-  def get_budget_expense_task(options)
+  def get_budget_expense_task(data)
     tasks = @todoist_service.get_tasks_by_label(BUDGET_EXPENSE_LABEL)
     return tasks[0]['id'] if !tasks.nil? && tasks.length > 0
 
     budget_expense_options = {
       content: 'Current week expenses',
-      description: options[:description],
+      description: data[:author],
       labels: [
         BUDGET_EXPENSE_LABEL,
       ]
     }
-    budget_expense_options[:labels].concat(options[:labels])
+    budget_expense_options[:labels].concat(data[:labels])
 
     return @todoist.create_task(budget_expense_options)
   end

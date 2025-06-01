@@ -19,7 +19,7 @@ bot = Telegram::Bot::Client.new(ENV['TELEGRAM_TOKEN'])
 
 bot.listen do |message|
   begin
-    bot_manager.process_message(message)
+    next unless bot_manager.process_message(message)
     response = bot_manager.needs_warning?(message) ? "⚠️ Media files are not supported. Task created without attachments." : "✅ Todoist task created"
     bot.api.send_message(chat_id: message.chat.id, text: response)
   rescue ForbiddenError => e

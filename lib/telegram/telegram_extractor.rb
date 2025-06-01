@@ -6,14 +6,20 @@ class TelegramExtractor
     return nil if text.nil?
 
     data = {
-      text: text,
-      sender: extract_sender,
-      links: extract_links,
-      username: extract_username
+      title: text, # text of the message
+      author: extract_sender, # author of the original message
+      sender: extract_username, # username of the message sender
+      additions: extract_links, # links and other additional content
+      timestamp: extract_timestamp, # when message was sent (taken from original telegram message)
+      labels: ['Telegram'] # default label for Telegram messages
     }
   end
 
   private
+
+  def extract_timestamp
+    @message.date&.to_i
+  end
 
   def extract_username
     @message.from.username || ''
